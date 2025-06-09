@@ -15,9 +15,12 @@ import {
   SimpleShowLayout,
   Button,
   useRecordContext,
+  useNotify,
+  useRefresh,
 } from "react-admin";
 import { Building } from "../../types";
 import BlockIcon from "@mui/icons-material/Block";
+import dataProvider from "../../dataProvider";
 
 const BuildingFilter = [
   <TextInput source="q" label="Search" alwaysOn />,
@@ -41,13 +44,33 @@ const BuildingFilter = [
 
 const StatusButton = () => {
   const record = useRecordContext<Building>();
+  const notify = useNotify();
+  const refresh = useRefresh();
   if (!record) return null;
 
   return (
     <Button
       label={record.status === "active" ? "Block" : "Activate"}
       onClick={() => {
-        // Handle status change
+        if (record.status === "active") {
+          dataProvider.custom.deletePost(record.id).then((res: any) => {
+            if (res?.error) {
+              notify(res?.error, { type: "error" });
+            } else {
+              notify(res?.data, { type: "success" });
+              refresh();
+            }
+          });
+        } else {
+          dataProvider.custom.acceptPost(record.id).then((res: any) => {
+            if (res?.error) {
+              notify(res?.error, { type: "error" });
+            } else {
+              notify(res?.data, { type: "success" });
+              refresh();
+            }
+          });
+        }
       }}
     >
       <BlockIcon />
@@ -56,16 +79,14 @@ const StatusButton = () => {
 };
 
 export const BuildingList = () => (
-  <List filters={BuildingFilter}>
-    <Datagrid rowClick="show">
+  <List resource="posts/admin/all" filters={BuildingFilter}>
+    <Datagrid bulkActionButtons={false}>
       <TextField source="title" />
       <ReferenceField source="locationId" reference="locations">
         <TextField source="label" />
       </ReferenceField>
       <TextField source="description" />
-      <ReferenceField source="typeId" reference="postTypes">
-        <TextField source="label" />
-      </ReferenceField>
+      <TextField source="PostType.label" />
       <NumberField source="price" />
       <NumberField source="space" />
       <NumberField source="numberOfRooms" label="Rooms" />
@@ -75,8 +96,8 @@ export const BuildingList = () => (
       <BooleanField source="garden" />
       <BooleanField source="pool" />
       <TextField source="status" />
-      <TextField source="userNumber" />
-      <TextField source="userName" />
+      <TextField source="User.number" />
+      <TextField source="User.name" />
       <StatusButton />
     </Datagrid>
   </List>
@@ -91,9 +112,7 @@ export const BuildingShow = () => (
       </ReferenceField>
       <TextField source="description" />
       <ImageField source="images" src="url" />
-      <ReferenceField source="typeId" reference="postTypes">
-        <TextField source="label" />
-      </ReferenceField>
+      <TextField source="PostType.label" />
       <NumberField source="price" />
       <NumberField source="space" />
       <NumberField source="numberOfRooms" label="Rooms" />
@@ -103,8 +122,8 @@ export const BuildingShow = () => (
       <BooleanField source="garden" />
       <BooleanField source="pool" />
       <TextField source="status" />
-      <TextField source="userNumber" />
-      <TextField source="userName" />
+      <TextField source="User.number" />
+      <TextField source="User.name" />
     </SimpleShowLayout>
   </Show>
 );

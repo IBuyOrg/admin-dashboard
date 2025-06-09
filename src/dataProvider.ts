@@ -24,9 +24,19 @@ const dataProvider: DataProvider = {
       params: query,
     });
     return {
-      data: data?.data?.users || data?.data?.requests || data?.data || data,
-      total: (data?.data?.users || data?.data?.requests || data?.data || data)
-        ?.length,
+      data:
+        data?.data?.posts ||
+        data?.data?.users ||
+        data?.data?.requests ||
+        data?.data ||
+        data,
+      total: (
+        data?.data?.posts ||
+        data?.data?.users ||
+        data?.data?.requests ||
+        data?.data ||
+        data
+      )?.length,
     };
   },
 
@@ -139,6 +149,30 @@ const dataProvider: DataProvider = {
         const { data } = await axios.patch(
           `${API_URL}/contact-requests/${id}/complete`
         );
+        return { data: data.message };
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+          return { error: error.response.data.message };
+        }
+        return { error: "Operation failed" };
+      }
+    },
+
+    deletePost: async (id: string) => {
+      try {
+        const { data } = await axios.delete(`${API_URL}/posts/admin/${id}`);
+        return { data: data.message };
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+          return { error: error.response.data.message };
+        }
+        return { error: "Operation failed" };
+      }
+    },
+
+    acceptPost: async (id: string) => {
+      try {
+        const { data } = await axios.put(`${API_URL}/posts/admin/${id}/accept`);
         return { data: data.message };
       } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
