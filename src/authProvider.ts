@@ -1,7 +1,7 @@
 import { AuthProvider } from "react-admin";
 import axios from "axios";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3000/api";
+const API_URL = process.env.REACT_APP_API_URL || "13.50.226.249:3000/api";
 
 const authProvider: AuthProvider = {
   login: async ({ username, password }) => {
